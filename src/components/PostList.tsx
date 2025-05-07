@@ -39,23 +39,23 @@ const PostItem = memo(({ post, currentUsername, onEditPost, onDeletePost }: Post
                             className="text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary transition-opacity cursor-pointer"
                             aria-label={`Delete post titled ${post.title}`}
                         >
-                            <img src={DeleteIcon} alt="Edit ico" className="w-5 h-5 object-cover" />
+                            <img src={DeleteIcon} alt="Edit ico" className="w-6 h-6 object-cover" />
                         </button>
                         <button
                             onClick={handleEdit}
                             className="text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary transition-opacity cursor-pointer"
                             aria-label={`Edit post titled ${post.title}`}
                         >
-                            <img src={EditIcon} alt="Edit ico" className="w-5 h-5 object-cover" />
+                            <img src={EditIcon} alt="Edit ico" className="w-6 h-6 object-cover" />
                         </button>
                     </div>
                 )}
             </header>
             <div className="bg-white p-6 rounded-b-2xl">
-                <p className="text-sm text-gray-500 mb-4">
-                    <span className="font-medium">@{post.username}</span> -{" "}
-                    {formatTimeAgo(post.created_datetime)}
-                </p>
+                <div className="text-sm text-gray-500 mb-4 flex justify-between items-center w-full">
+                    <span className="font-medium">@{post.username}</span>
+                    <span className="font-medium">{formatTimeAgo(post.created_datetime)}</span>
+                </div>
                 <p className="text-gray-700">{post.content}</p>
             </div>
         </article>
