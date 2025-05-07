@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { PostFormData } from "..";
+import type { PostFormData } from "../types";
 
 interface CreatePostFormProps {
     username: string;
