@@ -6,7 +6,7 @@
 }
 
 .input {
-    @apply focus:ring-primary focus:border-primary mt-1 w-full rounded-lg border p-2 focus:ring-1 focus:outline-none;
+    @apply focus:ring-primary focus:border-primary mt-2 w-full rounded-lg border p-2 focus:ring-1 focus:outline-none;
 }
 
 .button {
