@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #7695EC;
-    --color-secondary: #5E83E9;
+    --color-primary: #7695ec;
+    --color-secondary: #5e83e9;
+}
+
+.input {
+    @apply focus:ring-primary focus:border-primary mt-1 w-full rounded-lg border p-2 focus:ring-1 focus:outline-none;
+}
+
+.button {
+    @apply bg-primary hover:bg-secondary cursor-pointer rounded-md px-8 py-1 text-white transition-colors duration-200;
 }

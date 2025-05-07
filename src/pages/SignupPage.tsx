@@ -34,9 +34,9 @@ export default function SignupPage() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             autoFocus
-                            className={`mt-2 h-9 p-2 w-full border rounded-lg focus:outline-none focus:ring-1 ${showError
-                                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                                    : "focus:ring-primary focus:border-primary"
+                            className={`input ${showError
+                                ? "border-red-500! focus:ring-red-500! focus:border-red-500!"
+                                : ""
                                 }`}
                         />
                         {showError && (
@@ -49,9 +49,9 @@ export default function SignupPage() {
                         <button
                             type="submit"
                             disabled={!isValid}
-                            className={`h-9 w-24 rounded-lg text-white transition-colors cursor-pointer ${isValid
-                                    ? "bg-primary hover:bg-secondary"
-                                    : "bg-gray-300 cursor-not-allowed"
+                            className={`button ${isValid
+                                ? ""
+                                : "bg-gray-300! cursor-not-allowed!"
                                 }`}
                         >
                             ENTER
