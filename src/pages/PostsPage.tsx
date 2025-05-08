@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchPosts, createPost, updatePost, deletePost } from "../api";
 import CreatePostForm from "../components/CreatePostForm";
@@ -28,7 +28,7 @@ const usePostMutations = () => {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (error: Error) => {
-            alert(`Failed to create post: ${error.message}`);
+            alert(`Failed to create post: ${ error.message } `);
         },
     });
 
@@ -39,7 +39,7 @@ const usePostMutations = () => {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (error: Error) => {
-            alert(`Failed to update post: ${error.message}`);
+            alert(`Failed to update post: ${ error.message } `);
         },
     });
 
@@ -49,11 +49,28 @@ const usePostMutations = () => {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (error: Error) => {
-            alert(`Failed to delete post: ${error.message}`);
+            alert(`Failed to delete post: ${ error.message } `);
         },
     });
 
-    return { createMutation, updateMutation, deleteMutation };
+    const likeMutation = useMutation({
+        mutationFn: async (postId: number) => {
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            const likes = JSON.parse(localStorage.getItem("postLikes") || "{}");
+            likes[postId] = (likes[postId] || 0) + 1;
+            localStorage.setItem("postLikes", JSON.stringify(likes));
+            return { postId, likeCount: likes[postId] };
+        },
+        onSuccess: ({ postId, likeCount }) => {
+            queryClient.setQueryData(["postLikes", postId], likeCount);
+        },
+        onError: (error: Error) => {
+            alert(`Failed to like post: ${ error.message } `);
+        },
+    });
+
+    return { createMutation, updateMutation, deleteMutation, likeMutation };
 };
 
 export default function PostsPage() {
@@ -62,19 +79,21 @@ export default function PostsPage() {
         isDeleteOpen: false,
         selectedPost: null,
     });
+    const [likeCounts, setLikeCounts] = useState<{ [key: number]: number }>({});
     const navigate = useNavigate();
     const username: string = localStorage.getItem("username") || "";
-    const { createMutation, updateMutation, deleteMutation } =
-        usePostMutations();
+    const { createMutation, updateMutation, deleteMutation, likeMutation } = usePostMutations();
 
-    const {
-        data: postsResponse,
-        isLoading,
-        error,
-    } = useQuery<PostsResponse>({
+    const { data: postsResponse, isLoading, error } = useQuery<PostsResponse>({
         queryKey: ["posts"],
         queryFn: fetchPosts,
     });
+
+    useEffect(() => {
+        // Load initial like counts from localStorage
+        const storedLikes = JSON.parse(localStorage.getItem("postLikes") || "{}");
+        setLikeCounts(storedLikes);
+    }, []);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem("username");
@@ -109,7 +128,7 @@ export default function PostsPage() {
         (postData: Omit<Post, "id" | "created_datetime">) => {
             createMutation.mutate(postData);
         },
-        [createMutation],
+        [createMutation]
     );
 
     const handleSaveEdit = useCallback(
@@ -117,11 +136,11 @@ export default function PostsPage() {
             if (modalState.selectedPost) {
                 updateMutation.mutate(
                     { id: modalState.selectedPost.id, data: updatedPost },
-                    { onSuccess: () => closeModals() },
+                    { onSuccess: () => closeModals() }
                 );
             }
         },
-        [modalState.selectedPost, updateMutation, closeModals],
+        [modalState.selectedPost, updateMutation, closeModals]
     );
 
     const handleConfirmDelete = useCallback(() => {
@@ -131,6 +150,17 @@ export default function PostsPage() {
             });
         }
     }, [modalState.selectedPost, deleteMutation, closeModals]);
+
+    const handleLikePost = useCallback(
+        (postId: number) => {
+            likeMutation.mutate(postId, {
+                onSuccess: ({ postId, likeCount }) => {
+                    setLikeCounts((prev) => ({ ...prev, [postId]: likeCount }));
+                },
+            });
+        },
+        [likeMutation]
+    );
 
     if (isLoading)
         return (
@@ -155,19 +185,12 @@ export default function PostsPage() {
                         onClick={handleLogout}
                         className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white hover:bg-red-400"
                     >
-                        <img
-                            src={PowerIcon}
-                            alt="Power icon"
-                            className="h-5 w-5"
-                        />
+                        <img src={PowerIcon} alt="Power icon" className="h-5 w-5" />
                     </button>
                 </header>
 
                 <section aria-label="Create a new post">
-                    <CreatePostForm
-                        username={username}
-                        onSubmit={handleCreatePost}
-                    />
+                    <CreatePostForm username={username} onSubmit={handleCreatePost} />
                 </section>
 
                 <section aria-label="Posts list">
@@ -176,6 +199,8 @@ export default function PostsPage() {
                         currentUsername={username}
                         onEditPost={openEditModal}
                         onDeletePost={openDeleteModal}
+                        onLikePost={handleLikePost}
+                        likeCounts={likeCounts}
                     />
                 </section>
 
