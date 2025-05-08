@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SignupPage() {
-    const [username, setUsername] = useState<string>(sessionStorage.getItem("username") || "");
+    const [username, setUsername] = useState<string>(localStorage.getItem("username") || "");
     const navigate = useNavigate();
 
     const trimmedUsername = username.trim();
@@ -13,7 +13,7 @@ export default function SignupPage() {
         e.preventDefault();
 
         if (isValid) {
-            sessionStorage.setItem("username", trimmedUsername);
+            localStorage.setItem("username", trimmedUsername);
             navigate("/posts");
         }
     };

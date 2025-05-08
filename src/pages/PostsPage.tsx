@@ -6,6 +6,8 @@ import PostList from "../components/PostList";
 import DeleteModal from "../components/DeleteModal";
 import EditModal from "../components/EditModal";
 import type { Post } from "../types";
+import { useNavigate } from "react-router-dom";
+import PowerIcon from "../assets/icons/power.svg";
 
 interface PostsResponse {
     results: Post[];
@@ -54,39 +56,60 @@ const usePostMutations = () => {
     return { createMutation, updateMutation, deleteMutation };
 };
 
-
 export default function PostsPage() {
     const [modalState, setModalState] = useState<ModalState>({
         isEditOpen: false,
         isDeleteOpen: false,
         selectedPost: null,
     });
+    const navigate = useNavigate();
+    const username: string = localStorage.getItem("username") || "";
+    const { createMutation, updateMutation, deleteMutation } =
+        usePostMutations();
 
-    const username: string = sessionStorage.getItem("username") || "";
-    const { createMutation, updateMutation, deleteMutation } = usePostMutations();
-
-    const { data: postsResponse, isLoading, error } = useQuery<PostsResponse>({
+    const {
+        data: postsResponse,
+        isLoading,
+        error,
+    } = useQuery<PostsResponse>({
         queryKey: ["posts"],
         queryFn: fetchPosts,
     });
 
+    const handleLogout = useCallback(() => {
+        localStorage.removeItem("username");
+        navigate("/");
+    }, [navigate]);
+
     const openEditModal = useCallback((post: Post) => {
-        setModalState({ isEditOpen: true, isDeleteOpen: false, selectedPost: post });
+        setModalState({
+            isEditOpen: true,
+            isDeleteOpen: false,
+            selectedPost: post,
+        });
     }, []);
 
     const openDeleteModal = useCallback((post: Post) => {
-        setModalState({ isEditOpen: false, isDeleteOpen: true, selectedPost: post });
+        setModalState({
+            isEditOpen: false,
+            isDeleteOpen: true,
+            selectedPost: post,
+        });
     }, []);
 
     const closeModals = useCallback(() => {
-        setModalState({ isEditOpen: false, isDeleteOpen: false, selectedPost: null });
+        setModalState({
+            isEditOpen: false,
+            isDeleteOpen: false,
+            selectedPost: null,
+        });
     }, []);
 
     const handleCreatePost = useCallback(
         (postData: Omit<Post, "id" | "created_datetime">) => {
             createMutation.mutate(postData);
         },
-        [createMutation]
+        [createMutation],
     );
 
     const handleSaveEdit = useCallback(
@@ -94,11 +117,11 @@ export default function PostsPage() {
             if (modalState.selectedPost) {
                 updateMutation.mutate(
                     { id: modalState.selectedPost.id, data: updatedPost },
-                    { onSuccess: () => closeModals() }
+                    { onSuccess: () => closeModals() },
                 );
             }
         },
-        [modalState.selectedPost, updateMutation, closeModals]
+        [modalState.selectedPost, updateMutation, closeModals],
     );
 
     const handleConfirmDelete = useCallback(() => {
@@ -109,20 +132,35 @@ export default function PostsPage() {
         }
     }, [modalState.selectedPost, deleteMutation, closeModals]);
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    
+    if (isLoading)
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                Loading...
+            </div>
+        );
+
     if (error)
         return (
-            <div className="min-h-screen flex items-center justify-center text-red-500">
+            <div className="flex min-h-screen items-center justify-center text-red-500">
                 Error fetching posts: {error.message}
             </div>
         );
 
     return (
         <main className="min-h-screen bg-gray-100">
-            <div className="max-w-[800px] bg-white mx-auto">
-                <header className="h-20 bg-primary text-white flex items-center justify-between ps-9">
+            <div className="mx-auto max-w-[800px] bg-white">
+                <header className="bg-primary flex h-20 items-center justify-between px-9 text-white">
                     <h1 className="text-xl font-bold">CodeLeap Network</h1>
+                    <button
+                        onClick={handleLogout}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white hover:bg-red-400"
+                    >
+                        <img
+                            src={PowerIcon}
+                            alt="Power icon"
+                            className="h-5 w-5"
+                        />
+                    </button>
                 </header>
 
                 <section aria-label="Create a new post">

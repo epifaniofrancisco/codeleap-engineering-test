@@ -3,12 +3,12 @@ import SignupPage from "./pages/SignupPage";
 import PostsPage from "./pages/PostsPage";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-    const username = sessionStorage.getItem("username");
-    
+    const username = localStorage.getItem("username");
+
     if (!username) {
         return <Navigate to="/" replace />;
     }
-    
+
     return <>{children}</>;
 };
 
