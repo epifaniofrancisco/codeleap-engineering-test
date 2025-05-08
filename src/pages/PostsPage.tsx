@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchPosts, createPost, updatePost, deletePost } from "../api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPosts } from "../api";
 import CreatePostForm from "../components/CreatePostForm";
 import PostList from "../components/PostList";
 import DeleteModal from "../components/DeleteModal";
 import EditModal from "../components/EditModal";
+import Header from "../components/HeaderPost";
+import { usePostMutations } from "../hooks/usePostMutations";
 import type { Post } from "../types";
 import { useNavigate } from "react-router-dom";
-import PowerIcon from "../assets/icons/power.svg";
 
 interface PostsResponse {
     results: Post[];
@@ -18,60 +19,6 @@ interface ModalState {
     isDeleteOpen: boolean;
     selectedPost: Post | null;
 }
-
-const usePostMutations = () => {
-    const queryClient = useQueryClient();
-
-    const createMutation = useMutation({
-        mutationFn: createPost,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["posts"] });
-        },
-        onError: (error: Error) => {
-            alert(`Failed to create post: ${ error.message } `);
-        },
-    });
-
-    const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<Post> }) =>
-            updatePost(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["posts"] });
-        },
-        onError: (error: Error) => {
-            alert(`Failed to update post: ${ error.message } `);
-        },
-    });
-
-    const deleteMutation = useMutation({
-        mutationFn: deletePost,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["posts"] });
-        },
-        onError: (error: Error) => {
-            alert(`Failed to delete post: ${ error.message } `);
-        },
-    });
-
-    const likeMutation = useMutation({
-        mutationFn: async (postId: number) => {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            const likes = JSON.parse(localStorage.getItem("postLikes") || "{}");
-            likes[postId] = (likes[postId] || 0) + 1;
-            localStorage.setItem("postLikes", JSON.stringify(likes));
-            return { postId, likeCount: likes[postId] };
-        },
-        onSuccess: ({ postId, likeCount }) => {
-            queryClient.setQueryData(["postLikes", postId], likeCount);
-        },
-        onError: (error: Error) => {
-            alert(`Failed to like post: ${ error.message } `);
-        },
-    });
-
-    return { createMutation, updateMutation, deleteMutation, likeMutation };
-};
 
 export default function PostsPage() {
     const [modalState, setModalState] = useState<ModalState>({
@@ -90,7 +37,6 @@ export default function PostsPage() {
     });
 
     useEffect(() => {
-        // Load initial like counts from localStorage
         const storedLikes = JSON.parse(localStorage.getItem("postLikes") || "{}");
         setLikeCounts(storedLikes);
     }, []);
@@ -179,20 +125,10 @@ export default function PostsPage() {
     return (
         <main className="min-h-screen bg-gray-100">
             <div className="mx-auto max-w-[800px] bg-white">
-                <header className="bg-primary flex h-20 items-center justify-between px-9 text-white">
-                    <h1 className="text-xl font-bold">CodeLeap Network</h1>
-                    <button
-                        onClick={handleLogout}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white hover:bg-red-400"
-                    >
-                        <img src={PowerIcon} alt="Power icon" className="h-5 w-5" />
-                    </button>
-                </header>
-
+                <Header onLogout={handleLogout} />
                 <section aria-label="Create a new post">
                     <CreatePostForm username={username} onSubmit={handleCreatePost} />
                 </section>
-
                 <section aria-label="Posts list">
                     <PostList
                         posts={postsResponse?.results || []}
@@ -203,7 +139,6 @@ export default function PostsPage() {
                         likeCounts={likeCounts}
                     />
                 </section>
-
                 {modalState.isDeleteOpen && modalState.selectedPost && (
                     <DeleteModal
                         post={modalState.selectedPost}
@@ -211,7 +146,6 @@ export default function PostsPage() {
                         onDelete={handleConfirmDelete}
                     />
                 )}
-
                 {modalState.isEditOpen && modalState.selectedPost && (
                     <EditModal
                         post={modalState.selectedPost}
