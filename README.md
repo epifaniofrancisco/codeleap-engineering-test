@@ -1,54 +1,64 @@
-# React + TypeScript + Vite
+# CodeLeap Network
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CodeLeap Network is a React TypeScript application that allows users to create, edit, delete, and like posts, with advanced sorting and filtering capabilities. It features a responsive, modern UI styled with Tailwind CSS and leverages Tanstack Query for data fetching and mutations.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **User Authentication**: Simple username-based login (stored in `localStorage`).
+- **Post Management**:
+  - Create, edit, and delete posts (only by the post's author).
+  - Like posts with real-time like count updates (stored in `localStorage`).
+- **Sorting and Filtering**:
+  - Sort posts by newest, oldest, or most liked.
+  - Filter posts by username, title/content, or all fields.
+- **Responsive UI**:
+  - Mobile-friendly layout with stacked controls.
+  - Desktop-optimized horizontal layout.
+- **Accessibility**: Includes ARIA attributes and proper focus management.
 
-## Expanding the ESLint configuration
+## Setup Instructions
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-username/codeleap-network.git
+   cd codeleap-network
+   ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3. **Start the Development Server**:
+   ```bash
+   npm run dev
+   ```
+   
+4. **Build for Production**:
+   ```bash
+   npm run build
+   ```
+## Usage
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Login**:
+   - Enter a username on the login page to access the app.
+   - The username is stored in `localStorage`.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+2. **Create a Post**:
+   - Use the form at the top of the posts page to create a new post with a title and content.
+
+3. **Edit/Delete Posts**:
+   - If the logged-in user is the post’s author, edit and delete buttons appear in the post header.
+   - Edit opens a modal to update the post; delete opens a confirmation modal.
+
+4. **Like Posts**:
+   - Click the "Like" button to increment a post’s like count.
+   - Like counts are stored in `localStorage` and update in real-time.
+
+5. **Sort and Filter**:
+   - Use the filter dropdown to select "All", "Username", or "Title/Content".
+   - Enter a search term to filter posts.
+   - Use the sort dropdown to order posts by "Newest First", "Oldest First", or "Most Liked".
+
+6. **Logout**:
+   - Click the power icon in the header to log out and return to the login page.
