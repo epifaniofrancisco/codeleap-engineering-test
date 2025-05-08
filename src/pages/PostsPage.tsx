@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPosts } from "../api";
 import CreatePostForm from "../components/CreatePostForm";
@@ -7,8 +7,10 @@ import DeleteModal from "../components/DeleteModal";
 import EditModal from "../components/EditModal";
 import Header from "../components/HeaderPost";
 import { usePostMutations } from "../hooks/usePostMutations";
-import type { Post } from "../types";
+import type { FilterType, Post, SortOption } from "../types";
 import { useNavigate } from "react-router-dom";
+import { filterAndSortPosts } from "../utils";
+import SortAndFilterControls from "../components/SortAndFilterControls";
 
 interface PostsResponse {
     results: Post[];
@@ -27,6 +29,10 @@ export default function PostsPage() {
         selectedPost: null,
     });
     const [likeCounts, setLikeCounts] = useState<{ [key: number]: number }>({});
+    const [sortOption, setSortOption] = useState<SortOption>("newest");
+    const [filterType, setFilterType] = useState<FilterType>("all");
+    const [filterValue, setFilterValue] = useState<string>("");
+
     const navigate = useNavigate();
     const username: string = localStorage.getItem("username") || "";
     const { createMutation, updateMutation, deleteMutation, likeMutation } = usePostMutations();
@@ -108,6 +114,11 @@ export default function PostsPage() {
         [likeMutation]
     );
 
+    const filteredSortedPosts = useMemo(
+        () => filterAndSortPosts(postsResponse?.results, sortOption, filterType, filterValue, likeCounts),
+        [postsResponse?.results, sortOption, filterType, filterValue, likeCounts]
+    );
+
     if (isLoading)
         return (
             <div className="flex min-h-screen items-center justify-center">
@@ -129,9 +140,19 @@ export default function PostsPage() {
                 <section aria-label="Create a new post">
                     <CreatePostForm username={username} onSubmit={handleCreatePost} />
                 </section>
+                <section>
+                    <SortAndFilterControls
+                        sortOption={sortOption}
+                        setSortOption={setSortOption}
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                        filterValue={filterValue}
+                        setFilterValue={setFilterValue}
+                    />
+                </section>
                 <section aria-label="Posts list">
                     <PostList
-                        posts={postsResponse?.results || []}
+                        posts={filteredSortedPosts}
                         currentUsername={username}
                         onEditPost={openEditModal}
                         onDeletePost={openDeleteModal}

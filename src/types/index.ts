@@ -11,3 +11,6 @@ export interface PostFormData {
     title: string;
     content: string;
 }
+
+export type SortOption = "newest" | "oldest" | "most-liked";
+export type FilterType = "all" | "username" | "content";
